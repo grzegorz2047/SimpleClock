@@ -4,7 +4,14 @@ plugins {
 }
 
 ext {
-    hytaleHome = "${System.getProperty("user.home")}/AppData/Roaming/Hytale"
+    def os = System.getProperty("os.name").toLowerCase()
+    if (os.contains("win")) {
+        hytaleHome = "${System.getProperty("user.home")}/AppData/Roaming/Hytale"
+    } else if (os.contains("mac")) {
+        hytaleHome = "${System.getProperty("user.home")}/Library/Application Support/Hytale"
+    } else {
+        hytaleHome = "${System.getProperty("user.home")}/.local/share/Hytale"
+    }
 }
 
 java {
