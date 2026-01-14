@@ -10,7 +10,7 @@ ext {
     } else if (os.contains("mac")) {
         hytaleHome = "${System.getProperty("user.home")}/Library/Application Support/Hytale"
     } else {
-        hytaleHome = "${System.getProperty("user.home")}/.local/share/Hytale"
+        hytaleHome = "${System.getProperty("user.home")}/.var/app/com.hypixel.HytaleLauncher/data/Hytale"
     }
 }
 
