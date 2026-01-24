@@ -1,14 +1,14 @@
 {
-    "Group": "Example",
-    "Name": "ExamplePlugin",
+    "Group": "Hytale",
+    "Name": "SimpleClock",
     "Version": "0.0.2",
-    "Description": "An example plugin for HyTale!",
+    "Description": "Adds clock at top of the screen!",
     "Authors": [
         {
-            "Name": "It's you!"
+            "Name": "grzegorz2047"
         }
     ],
-    "Website": "example.org",
+    "Website": "grzegorz2047",
     "ServerVersion": "*",
     "Dependencies": {
         
@@ -17,6 +17,6 @@
         
     },
     "DisabledByDefault": false,
-    "Main": "org.example.plugin.ExamplePlugin",
+    "Main": "pl.grzegorz2047.hytale.simpleclock.SimpleClock",
     "IncludesAssetPack": true
 }
