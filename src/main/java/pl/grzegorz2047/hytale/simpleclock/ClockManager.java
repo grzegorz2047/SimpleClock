@@ -31,8 +31,10 @@ public class ClockManager {
 
     public void addPlayerClock(PlayerRef playerRef, Player player) {
         HudManager hudManager = player.getHudManager();
-        int fontSize = this.config.get().getFontSize();
-        ClockUI hud = new ClockUI(playerRef, fontSize);
+        MainConfig mainConfig = this.config.get();
+        int fontSize = mainConfig.getFontSize();
+        int widthClockArea = mainConfig.getWidthClockArea();
+        ClockUI hud = new ClockUI(playerRef, fontSize, widthClockArea);
 
         hudManager.setCustomHud(playerRef, hud);
         this.playersHud.put(playerRef, hud);
@@ -50,7 +52,9 @@ public class ClockManager {
     }
 
     private void updatePlayersClock() {
-        String[] worldsWithClockEnabled = this.config.get().getWorldsWithClockEnabled();
+        MainConfig mainConfig = this.config.get();
+        String[] worldsWithClockEnabled = mainConfig.getWorldsWithClockEnabled();
+        String pattern = mainConfig.getClockPattern();
         List<String> list = Arrays.asList(worldsWithClockEnabled);
         Map<String, World> worlds = Universe.get().getWorlds();
         worlds.forEach((worldName, world) -> {
@@ -62,7 +66,7 @@ public class ClockManager {
                     }
                     Runnable updateTask = () -> {
                         ClockUI clockUI = this.playersHud.get(playerRef);
-                        clockUI.setTime(readWorldTime(playerRef.getReference().getStore()));
+                        clockUI.setTime(readWorldTime(playerRef.getReference().getStore(), pattern));
                     };
                     if (world.isInThread()) {
                         updateTask.run();
@@ -74,11 +78,11 @@ public class ClockManager {
         });
     }
 
-    private String readWorldTime(Store<EntityStore> store) {
+    private String readWorldTime(Store<EntityStore> store, String pattern) {
         WorldTimeResource worldTimeRes = store.getResource(WorldTimeResource.getResourceType());
         LocalDateTime gameTime = worldTimeRes.getGameDateTime();
         if (gameTime == null) return "00:00";
-        return DateTimeFormatter.ofPattern("HH:mm").format(gameTime.toLocalTime());
+        return DateTimeFormatter.ofPattern(pattern).format(gameTime.toLocalTime()).toLowerCase();
     }
 
     public void stop() {

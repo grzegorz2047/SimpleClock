@@ -1,4 +1,4 @@
-Group {
+Group #SimpleHudObj {
   Background: #000000(0.6);
   Anchor: (Width: 77, Height: 36, Top: 60);
   Label #SimpleHudText {
