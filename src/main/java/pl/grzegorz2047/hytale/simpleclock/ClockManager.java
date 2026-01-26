@@ -78,7 +78,8 @@ public class ClockManager {
                     }
                     Runnable updateTask = () -> {
                         ClockUI clockUI = this.playersHud.get(playerRef);
-                        clockUI.setTime(readWorldTime(playerRef.getReference().getStore(), pattern));
+                        String timeText = readWorldTime(playerRef.getReference().getStore(), pattern);
+                        clockUI.setTime(timeText);
                     };
                     if (world.isInThread()) {
                         updateTask.run();
@@ -94,7 +95,7 @@ public class ClockManager {
         WorldTimeResource worldTimeRes = store.getResource(WorldTimeResource.getResourceType());
         LocalDateTime gameTime = worldTimeRes.getGameDateTime();
         if (gameTime == null) return "00:00";
-        return DateTimeFormatter.ofPattern(pattern).format(gameTime.toLocalTime()).toLowerCase();
+        return DateTimeFormatter.ofPattern(pattern).format(gameTime).toLowerCase();
     }
 
     public void stop() {

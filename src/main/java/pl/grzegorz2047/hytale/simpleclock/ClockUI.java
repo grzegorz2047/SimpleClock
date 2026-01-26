@@ -55,4 +55,36 @@ public class ClockUI extends CustomUIHud {
         builder.set("#SimpleHudText.Text", this.time);
         this.update(false, builder);
     }
+
+
+    private static final int[][] COLORS = {
+            {74, 105, 189},   // noc 00:00
+            {255, 217, 102},  // świt 06:00
+            {255, 255, 255},  // dzień 12:00
+            {255, 159, 67},   // zachód 18:00
+            {74, 105, 189}    // noc 24:00
+    };
+
+    private static final int[] HOURS = {0, 6, 12, 18, 24};
+
+    public static String getTextColorByTime(double hour) {
+
+        for (int i = 0; i < HOURS.length - 1; i++) {
+            if (hour >= HOURS[i] && hour <= HOURS[i + 1]) {
+                double progress =
+                        (hour - HOURS[i]) / (HOURS[i + 1] - HOURS[i]);
+
+                int r = lerp(COLORS[i][0], COLORS[i + 1][0], progress);
+                int g = lerp(COLORS[i][1], COLORS[i + 1][1], progress);
+                int b = lerp(COLORS[i][2], COLORS[i + 1][2], progress);
+
+                return String.format("#%02X%02X%02X", r, g, b);
+            }
+        }
+        return "#FFFFFF"; // fallback
+    }
+
+    private static int lerp(int start, int end, double t) {
+        return (int) Math.round(start + (end - start) * t);
+    }
 }

@@ -9,7 +9,7 @@ public class MainConfig {
 
     private String clockPosition = "center";
     private String[] worldsWithClockEnabled = new String[]{"default"};
-    private String clockPattern = "hh:mm";
+    private String clockPattern = "HH:mm";
     private int widthClockArea = 77;
     private int fontSize = 16;
     private boolean backgroundColorEnabled = true;
