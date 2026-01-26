@@ -1,10 +1,22 @@
-Group #SimpleHudObj {
+Group #SimpleHudObjWithOpacity {
   Background: #000000(0.6);
   Anchor: (Width: 77, Height: 36, Top: 60);
   Label #SimpleHudText {
     Anchor: (Width: 120, Height: 18, Top: 10, Horizontal: 0);
     Text: "00:00";
     Style: (HorizontalAlignment: Center, VerticalAlignment: Center, 
+      FontSize: 14,
+      TextColor: #FFFFFF(0.95),
+      Alignment: Center,
+    );
+  }
+}
+Group #SimpleHudObj {
+  Anchor: (Width: 77, Height: 36, Top: 60);
+  Label #SimpleHudText {
+    Anchor: (Width: 120, Height: 18, Top: 10, Horizontal: 0);
+    Text: "00:00";
+    Style: (HorizontalAlignment: Center, VerticalAlignment: Center,
       FontSize: 14,
       TextColor: #FFFFFF(0.95),
       Alignment: Center,

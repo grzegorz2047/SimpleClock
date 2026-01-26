@@ -11,19 +11,29 @@ public class ClockUI extends CustomUIHud {
     private final int widthClockArea;
     private final int CONTAINER_HEIGHT = 36;
     private final int CONTAINER_TOP = 60;
+    private final boolean backgroundColorEnabled;
     private volatile String time = "00:00";
     private final int fontSize;
 
-    public ClockUI(PlayerRef playerRef, int fontSize, int widthClockArea) {
+    public ClockUI(PlayerRef playerRef, int fontSize, int widthClockArea, boolean backgroundColorEnabled) {
         super(playerRef);
         this.fontSize = fontSize;
         this.widthClockArea = widthClockArea;
+        this.backgroundColorEnabled = backgroundColorEnabled;
     }
 
 
     @Override
     protected void build(@NonNullDecl UICommandBuilder uiCommandBuilder) {
         uiCommandBuilder.append("Hud/SimpleClockUI.ui");
+        String groupId;
+        if (backgroundColorEnabled) {
+            groupId = "#SimpleHudObjWithOpacity";
+            uiCommandBuilder.remove("#SimpleHudObj");
+        } else {
+            groupId = "#SimpleHudObj";
+            uiCommandBuilder.remove("#SimpleHudObjWithOpacity");
+        }
         uiCommandBuilder.set("#SimpleHudText.Style.FontSize", this.fontSize);
         uiCommandBuilder.set("#SimpleHudText.Text", this.time);
         Anchor data = new Anchor();
@@ -31,7 +41,7 @@ public class ClockUI extends CustomUIHud {
         data.setHeight(Value.of(CONTAINER_HEIGHT));
         data.setTop(Value.of(CONTAINER_TOP));
         uiCommandBuilder.setObject(
-                "#SimpleHudObj.Anchor",
+                groupId+ ".Anchor",
                 data
         );
     }

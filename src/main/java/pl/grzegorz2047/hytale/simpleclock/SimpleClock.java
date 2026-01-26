@@ -29,7 +29,7 @@ public class SimpleClock extends JavaPlugin {
     @Override
     public CompletableFuture<Void> preLoad() {
         this.config = loadConfig();
-        clockManager = new ClockManager(config);
+        clockManager = new ClockManager(config, this);
         return super.preLoad();
     }
 

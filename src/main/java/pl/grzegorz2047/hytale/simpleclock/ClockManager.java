@@ -1,11 +1,15 @@
 package pl.grzegorz2047.hytale.simpleclock;
 
+import com.buuz135.mhud.MultipleHUD;
+import com.hypixel.hytale.common.plugin.PluginIdentifier;
 import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.server.core.HytaleServer;
 import com.hypixel.hytale.server.core.entity.entities.Player;
 import com.hypixel.hytale.server.core.entity.entities.player.hud.HudManager;
 import com.hypixel.hytale.server.core.modules.time.WorldTimeResource;
+import com.hypixel.hytale.server.core.plugin.PluginBase;
+import com.hypixel.hytale.server.core.plugin.PluginManager;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.Universe;
 import com.hypixel.hytale.server.core.universe.world.World;
@@ -23,10 +27,12 @@ import java.util.concurrent.TimeUnit;
 public class ClockManager {
     private final Map<PlayerRef, ClockUI> playersHud = new ConcurrentHashMap<>();
     private final Config<MainConfig> config;
+    private final SimpleClock simpleClock;
     private ScheduledFuture<?> updaterTask;
 
-    public ClockManager(Config<MainConfig> config) {
+    public ClockManager(Config<MainConfig> config, SimpleClock simpleClock) {
         this.config = config;
+        this.simpleClock = simpleClock;
     }
 
     public void addPlayerClock(PlayerRef playerRef, Player player) {
@@ -34,10 +40,16 @@ public class ClockManager {
         MainConfig mainConfig = this.config.get();
         int fontSize = mainConfig.getFontSize();
         int widthClockArea = mainConfig.getWidthClockArea();
-        ClockUI hud = new ClockUI(playerRef, fontSize, widthClockArea);
-
-        hudManager.setCustomHud(playerRef, hud);
-        this.playersHud.put(playerRef, hud);
+        boolean backgroundColorEnabled = mainConfig.isBackgroundColorEnabled();
+        ClockUI hud = new ClockUI(playerRef, fontSize, widthClockArea, backgroundColorEnabled);
+        PluginBase plugin = PluginManager.get().getPlugin(PluginIdentifier.fromString("Buuz135:MultipleHUD"));
+        if (plugin == null) {
+            hudManager.setCustomHud(playerRef, hud);
+            this.playersHud.put(playerRef, hud);
+        } else {
+            MultipleHUD.getInstance().setCustomHud(player, playerRef, "SimpleClock", hud);
+            this.playersHud.put(playerRef, hud);
+        }
     }
 
     public void removePlayerClock(PlayerRef playerRef) {
