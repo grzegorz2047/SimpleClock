@@ -6,15 +6,19 @@ import com.hypixel.hytale.component.Ref;
 import com.hypixel.hytale.component.Store;
 import com.hypixel.hytale.server.core.HytaleServer;
 import com.hypixel.hytale.server.core.entity.entities.Player;
+import com.hypixel.hytale.server.core.entity.entities.player.hud.CustomUIHud;
 import com.hypixel.hytale.server.core.entity.entities.player.hud.HudManager;
 import com.hypixel.hytale.server.core.modules.time.WorldTimeResource;
 import com.hypixel.hytale.server.core.plugin.PluginBase;
 import com.hypixel.hytale.server.core.plugin.PluginManager;
+import com.hypixel.hytale.server.core.ui.builder.UICommandBuilder;
 import com.hypixel.hytale.server.core.universe.PlayerRef;
 import com.hypixel.hytale.server.core.universe.Universe;
 import com.hypixel.hytale.server.core.universe.world.World;
 import com.hypixel.hytale.server.core.universe.world.storage.EntityStore;
 import com.hypixel.hytale.server.core.util.Config;
+import org.checkerframework.checker.nullness.compatqual.NonNullDecl;
+import org.checkerframework.checker.nullness.compatqual.NullableDecl;
 import pl.grzegorz2047.hytale.simpleclock.config.MainConfig;
 
 import java.time.LocalDateTime;
@@ -28,11 +32,13 @@ public class ClockManager {
     private final Map<PlayerRef, ClockUI> playersHud = new ConcurrentHashMap<>();
     private final Config<MainConfig> config;
     private final SimpleClock simpleClock;
+    private final PluginBase plugin;
     private ScheduledFuture<?> updaterTask;
 
     public ClockManager(Config<MainConfig> config, SimpleClock simpleClock) {
         this.config = config;
         this.simpleClock = simpleClock;
+        plugin = PluginManager.get().getPlugin(PluginIdentifier.fromString("Buuz135:MultipleHUD"));
     }
 
     public void addPlayerClock(PlayerRef playerRef, Player player) {
@@ -42,7 +48,6 @@ public class ClockManager {
         int widthClockArea = mainConfig.getWidthClockArea();
         boolean backgroundColorEnabled = mainConfig.isBackgroundColorEnabled();
         ClockUI hud = new ClockUI(playerRef, fontSize, widthClockArea, backgroundColorEnabled);
-        PluginBase plugin = PluginManager.get().getPlugin(PluginIdentifier.fromString("Buuz135:MultipleHUD"));
         if (plugin == null) {
             hudManager.setCustomHud(playerRef, hud);
             this.playersHud.put(playerRef, hud);
@@ -71,21 +76,50 @@ public class ClockManager {
         Map<String, World> worlds = Universe.get().getWorlds();
         worlds.forEach((worldName, world) -> {
             if (list.contains(worldName)) {
-                for (PlayerRef playerRef : world.getPlayerRefs()) {
-                    Ref<EntityStore> ref = playerRef.getReference();
-                    if (ref == null || !ref.isValid()) {
-                        continue;
-                    }
-                    Runnable updateTask = () -> {
+                Runnable updateTask = () -> {
+                    for (PlayerRef playerRef : world.getPlayerRefs()) {
+                        Ref<EntityStore> ref = playerRef.getReference();
+                        if (ref == null || !ref.isValid()) {
+                            continue;
+                        }
                         ClockUI clockUI = this.playersHud.get(playerRef);
                         String timeText = readWorldTime(playerRef.getReference().getStore(), pattern);
                         clockUI.setTime(timeText);
-                    };
-                    if (world.isInThread()) {
-                        updateTask.run();
-                    } else {
-                        world.execute(updateTask);
                     }
+                };
+                if (world.isInThread()) {
+                    updateTask.run();
+                } else {
+                    world.execute(updateTask);
+                }
+            } else {
+                Runnable updateTask = () -> {
+                    for (PlayerRef playerRef : world.getPlayerRefs()) {
+                        Ref<EntityStore> ref = playerRef.getReference();
+                        if (ref == null || !ref.isValid()) {
+                            continue;
+                        }
+                        Player player = getPlayer(playerRef);
+                        ClockUI clockUI = this.playersHud.get(playerRef);
+                        if (clockUI != null) {
+                            if (plugin == null) {
+                                player.getHudManager().setCustomHud(playerRef, new CustomUIHud(playerRef) {
+                                    @Override
+                                    protected void build(@NonNullDecl UICommandBuilder uiCommandBuilder) {
+
+                                    }
+                                });
+                            } else {
+                                MultipleHUD.getInstance().hideCustomHud(player, playerRef, "SimpleClock");
+                            }
+                            this.playersHud.remove(playerRef);
+                        }
+                    }
+                };
+                if (world.isInThread()) {
+                    updateTask.run();
+                } else {
+                    world.execute(updateTask);
                 }
             }
         });
@@ -104,5 +138,23 @@ public class ClockManager {
         }
         this.updaterTask.cancel(false);
         this.playersHud.clear();
+    }
+
+    @NullableDecl
+    private static Player getPlayer(PlayerRef playerRef) {
+        Player player = null;
+        Ref<EntityStore> reference = playerRef.getReference();
+        if (reference != null) {
+            player = findPlayerInPlayerComponentsBag(reference.getStore(), reference);
+        }
+        return player;
+    }
+
+    @NullableDecl
+    public static Player findPlayerInPlayerComponentsBag(Store<EntityStore> store, Ref<EntityStore> refEntityStore) {
+        if (store == null || refEntityStore == null) {
+            return null;
+        }
+        return store.getComponent(refEntityStore, Player.getComponentType());
     }
 }
